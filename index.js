@@ -1,20 +1,30 @@
-const ethers = require('ethers')
-const config = require('./config.json')
+import ethers from "ethers"
+import * as dotenv from 'dotenv'
+dotenv.config()
 
-const encryptAndUpload = async () => {
-  const wallet = ethers.Wallet.createRandom()
-  console.log('\naddress: ', wallet.address)
-  console.log('\nmnemonic: ', wallet.mnemonic.phrase)
-  console.log('\nprivateKey: ', wallet.privateKey)
+import { createWallet } from "./utils/EtherFunctions.js"
+import { encryptWithCMK, decryptWithCMK } from "./utils/AWSFunctions.js"
 
-  let encrypted = await wallet.encrypt(config.ENCRRYPTION_PASSWORD)
-  console.log("\nencrypted: ", encrypted)
+const encrypt = async (wallet) => {
+  const encryptedWithEther = await wallet.encrypt(process.env.ETHER_ENCRRYPTION_PASSWORD)
+  console.log("Encrypted with ether: ", encryptedWithEther)
 
-  let decrypted = await ethers.Wallet.fromEncryptedJson(encrypted, config.ENCRRYPTION_PASSWORD)
-  console.log("\ndecrypted: ", decrypted)
+  const encryptedWithCMK = await encryptWithCMK(Buffer.from(encryptedWithEther.toString(), 'utf-8'))
+  return encryptedWithCMK
 }
 
-const retrieveAndDecrypt = async () => { }
+const decrypt = async (encryptedWithCMK) => {
+  const decryptedWithCMK = await decryptWithCMK(encryptedWithCMK)
 
-encryptAndUpload()
-retrieveAndDecrypt()
+  const decryptedWithEther = await ethers.Wallet.fromEncryptedJson(decryptedWithCMK, process.env.ETHER_ENCRRYPTION_PASSWORD)
+  console.log("Decrypted with ether: ", decryptedWithEther)
+  return decryptedWithEther
+}
+
+const main = async () => {
+  const wallet = await createWallet()
+  const encryptedWithCMK = await encrypt(wallet)
+  const decryptedWithEther = await decrypt(encryptedWithCMK)
+}
+
+main()

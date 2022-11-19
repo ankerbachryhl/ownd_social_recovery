@@ -1,10 +1,11 @@
 {
   "name": "ownd_social_recovery",
+  "type": "module",
   "version": "1.0.0",
   "description": "- create script for encrypting mnemonic created by ethers.js with password and upload to AWS KMS - create script for getting key from AWS KMS and decrypting using password",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node --experimental-json-modules index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,6 +19,8 @@
   },
   "homepage": "https://github.com/ankerbachryhl/ownd_social_recovery#readme",
   "dependencies": {
+    "aws-sdk": "^2.1258.0",
+    "dotenv": "^16.0.3",
     "ethers": "^5.7.2"
   }
 }
